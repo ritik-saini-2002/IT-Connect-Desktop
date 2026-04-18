@@ -34,8 +34,10 @@ kotlin {
             implementation("com.squareup.okhttp3:okhttp:4.12.0")
             implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-            // JSON — same Gson as Android
+            // JSON — same Gson + org.json as Android (Android bundles org.json
+            // via the SDK; on JVM we pull it in explicitly).
             implementation("com.google.code.gson:gson:2.11.0")
+            implementation("org.json:json:20240303")
 
             // Coroutines core (coroutines-swing already provided above)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")

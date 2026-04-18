@@ -20,7 +20,7 @@ Legend: ⬜ Not started · 🟡 In progress · 🔴 Blocked · ✅ Done
 | 3  | Project structure              | ✅     | claude | 2026-04-18 | 2026-04-18 | (initial commit) | jvmMain package tree under com/itconnect/desktop/ (12 packages) |
 | 4  | Add dependencies               | ✅     | claude | 2026-04-18 | 2026-04-18 | (initial commit) | OkHttp, Gson, sqlite-jdbc, JNA, slf4j — see §16 for Room→JDBC deviation |
 | 5  | Port data layer                | ✅     | claude | 2026-04-18 | 2026-04-18 | (initial commit) | Models + PcControlDatabase JDBC wrapper + 4 DAOs + Repository. DB boots, WAL works, migrations run |
-| 6  | Port network layer             | ⬜     | —     | —          | —         | —                 | OkHttp clients, PrivateNetworkInterceptor, WakeOnLan |
+| 6  | Port network layer             | ✅     | claude | 2026-04-18 | 2026-04-18 | (session 2 commit) | PcControlSettings + PrivateNetworkInterceptor + WakeOnLan + PcLanScanner + PcControlApiClient/Browse/Input + LiveStreamGate + PcThumbnailFetcher. Android→JVM swaps: Build.MODEL → hostname; android.util.Log → SLF4J; android.util.Base64 → java.util.Base64; SystemClock.elapsedRealtime → System.nanoTime/1e6; WifiManager DHCP broadcast → NetworkInterface enumeration |
 | 7  | Port UI screens                | ⬜     | —     | —          | —         | —                 | Compose screens; haptic removed; bitmap decoder → Skia |
 | 8  | Drag-and-drop canvas           | ⬜     | —     | —          | —         | —                 | left palette / right canvas; execute + schedule zones |
 | 9  | Database future-proofing       | ⬜     | —     | —          | —         | —                 | sync-schema script + schemaVersion guard |
@@ -95,6 +95,19 @@ the JDBC layer is worth replacing with Room. Non-urgent.
   cert-fingerprint field.
 
 ## 18. Session log
+
+### 2026-04-18 — claude (session 2)
+- Touched phases: 6 ✅
+- Current state: network layer fully ported. 7 new files under
+  `com/itconnect/desktop/network/` (PcControlSettings, PrivateNetworkInterceptor,
+  WakeOnLan, PcLanScanner, PcControlApiClient, PcThumbnailFetcher). Compiles
+  clean; not yet integration-tested against a live agent.
+- Loose ends:
+  - Added `org.json:json:20240303` to deps (Android bundles it via SDK;
+    JVM needs explicit dep — `fetchScreenSnapshot`, `fetchScreenInfo`, and
+    `PcLanScanner` all rely on `org.json.JSONObject`).
+  - Phase 7 (UI screens) is the next natural step but pulls in Hilt /
+    AuthRepository — needs a planning pass before code lands.
 
 ### 2026-04-18 — claude (port kickoff, session 1)
 - Touched phases: 3 ✅, 4 ✅, 5 ✅, 13 🟡, 14 🟡
