@@ -8,6 +8,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.itconnect.desktop.app.AppShell
 import com.itconnect.desktop.data.PcControlDatabase
 import com.itconnect.desktop.data.PcControlRepository
+import com.itconnect.desktop.scheduler.PcScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +31,9 @@ fun main() {
     // Seed default plans on first launch; fire-and-forget.
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     appScope.launch { repo.seedIfEmpty() }
+
+    // Drive the 60 s schedule tick (replaces Android's WorkManager worker).
+    PcScheduler.start(repo)
 
     application {
         Window(

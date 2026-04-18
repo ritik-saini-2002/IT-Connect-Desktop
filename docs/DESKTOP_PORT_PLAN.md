@@ -24,7 +24,7 @@ Legend: ⬜ Not started · 🟡 In progress · 🔴 Blocked · ✅ Done
 | 7  | Port UI screens                | ⬜     | —     | —          | —         | —                 | Compose screens; haptic removed; bitmap decoder → Skia |
 | 8  | Drag-and-drop canvas           | ⬜     | —     | —          | —         | —                 | left palette / right canvas; execute + schedule zones |
 | 9  | Database future-proofing       | ⬜     | —     | —          | —         | —                 | sync-schema script + schemaVersion guard |
-| 10 | Scheduler                      | ⬜     | —     | —          | —         | —                 | ScheduledExecutorService 60 s tick |
+| 10 | Scheduler                      | ✅     | claude | 2026-04-18 | 2026-04-18 | (session 3 commit) | PcScheduler singleton; 60 s daemon tick; dispatch body mirrors Android PcScheduleWorker (WOL / SHUTDOWN / SLEEP / LOCK / EXECUTE_PLAN). Wired in main.kt; logs "scheduler starting — 60 s tick" on boot |
 | 11 | Desktop adapters               | ⬜     | —     | —          | —         | —                 | tray, Windows Hello / PIN, autostart registry |
 | 12 | PocketBase sync                | ⬜     | —     | —          | —         | —                 | shared users/permissions/devices/plans/schedules; realtime |
 | 13 | Package `.exe`                 | 🟡     | claude | 2026-04-18 | —         | (initial commit) | Gradle config wired (TargetFormat.Exe + windows{} block); `./gradlew packageExe` available. Not yet run; no icon.ico |
@@ -95,6 +95,21 @@ the JDBC layer is worth replacing with Room. Non-urgent.
   cert-fingerprint field.
 
 ## 18. Session log
+
+### 2026-04-18 — claude (session 3)
+- Touched phases: 10 ✅
+- Current state: `PcScheduler` object with single daemon thread ticks
+  every 60 s through `PcControlRepository.dueSchedulesNow()`, dispatching
+  WOL / system-commands / EXECUTE_PLAN per the Android worker's body.
+  Wired into `main.kt` right after DB init. Verified via a brief run —
+  scheduler start line appears in logs; DB reopens at user_version=8 on
+  subsequent boot (migrations idempotent).
+- Loose ends:
+  - `Dispatchers` / `.launch` imports removed from main.kt could not be
+    removed yet — still needed for the `seedIfEmpty` launch path.
+  - Scheduler does not persist "last tick" across restarts; each launch
+    evaluates `dueSchedulesNow` immediately (intentional — catch-up logic
+    lives in the repository).
 
 ### 2026-04-18 — claude (session 2)
 - Touched phases: 6 ✅
